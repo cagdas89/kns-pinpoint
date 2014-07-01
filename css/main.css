@@ -1,0 +1,10 @@
+body {
+    width: 100%;
+    height: 100%;
+}
+
+#floor-plan-canvas {
+    border: 4px solid #000000;
+    margin: 50px auto;
+    display: block;
+}
