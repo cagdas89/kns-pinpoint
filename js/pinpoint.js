@@ -1,10 +1,8 @@
 // When dom ready fire this.
 var canvas;
 var ctx;
-var nodes = new Array();
 var listOfLines=new Array();
 var checkKeyPressed = false;
-var removeLastLine=false;
 var background;
 var completionNumber=30;
 var keyAcounter=1;
@@ -33,9 +31,6 @@ $(function () {
 var LineClass = function () {
     this.name=name;
     this.points = new Array();
-   // this.xCoC=new Array();
-   // this.yCoC=new Array();
-
     this.addLine= function(x,y){
       this.points.push(x);
         this.points.push(y);
@@ -49,8 +44,8 @@ function deleteAllLines() {
     ctx.drawImage(background, 0, 0);
     line.points.length=0;
     listOfLines.length=0;
-    //line.xCoC.length=0;
-    //line.yCoC.length=0;
+
+
 }
 
 function redrawStoredLines() {
@@ -60,21 +55,20 @@ function redrawStoredLines() {
         ctx.drawImage(background, 0, 0);
 
 
-    ctx.moveTo(listOfLines[0].points[i], listOfLines[i].points[i]);
-    ctx.lineTo(listOfLines[i].points[i], listOfLines[i].points[i]);
 
-    for(var i=0;i<listOfLines.length;i++){
-       /* var connector=connectors[i];
-        var box1=boxes[connector.box1];
-        var box2=boxes[connector.box2];*/
-        for (var j=0;j<listOfLines[i].points.length;j++){
+        console.log(listOfLines[0].points[0]);
+
+/*
+        for (var j=0;j<line.length;j+=2){
 
             ctx.beginPath();
-            ctx.moveTo(line.points[i], line.points[i]);
-            ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2);
+            ctx.moveTo(line.points[j], line.points[j+1]);
+            ctx.lineTo(line.points[j+2], line.points[j+3]);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ff0000';
             ctx.stroke();
         }
-    }
+*/
 
 }
 
@@ -128,6 +122,7 @@ function pinpoint() {
 
             listOfLines.push(line);
 
+
             checkKeyPressed = true;
             //nameOfContext=prompt("Enter the name: ");
 
@@ -135,16 +130,14 @@ function pinpoint() {
             console.log(line.points.join());
             //console.log(nameOfContext);
             checkKeyPressed = false;
-            nodes.length=0;
 
-
-            for(var i=0;i<listOfLines.length;i++) {
+   /*         for(var i=0;i<listOfLines.length;i++) {
                 console.log(i +". line name is :"+ listOfLines[i].name);
                 console.log(i+". line has "+ (listOfLines[i].points.length)/2+" points");
                 console.log(i+". line has "+ (listOfLines[0].points.length)/2+" points");
                 console.log(listOfLines[i].points[i]);
 
-            }
+            } */
 
             var nameofLine=prompt("enter the"+keyAcounter+". line name: ");
             line=new LineClass();
@@ -152,16 +145,36 @@ function pinpoint() {
         }
 
 
-       else if (event.which == 83) {   //83: key "S"
+       else if (event.which == 83) {   //83: key "S" ---kaos
 
             event.preventDefault();
-            nodes.pop();
-            nodes.pop();
+            line.points.pop();
+            line.points.pop();
             redrawStoredLines();
-            removeLastLine = true;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(background, 0, 0);
+
+
+
+            console.log("aaaaaaaaaaaa"+listOfLines[0].points[0]);
+
+
+            for (var j=0;j<line.length;j+=2){
+
+                ctx.beginPath();
+                ctx.moveTo(line.points[j], line.points[j+1]);
+                ctx.lineTo(line.points[j+2], line.points[j+3]);
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#ff0000';
+                ctx.stroke();
+            }
+
+
+
         }
 
-        else if (event.which == 68) {   //63: key "D"
+        else if (event.which == 68) {   //68: key "D"
 
              deleteAllLines();
 
