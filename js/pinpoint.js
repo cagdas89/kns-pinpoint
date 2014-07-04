@@ -2,16 +2,12 @@
 var canvas;
 var ctx;
 var nodes = new Array();
-var xCo=new Array();
-var yCo=new Array();
-var clickCounter = 0;
-var xTriggered = 0;
+var listOfLines=new Array();
 var checkKeyPressed = false;
-var nameOfContext;
 var removeLastLine=false;
-var area;
 var background;
-
+var completionNumber=30;
+var keyAcounter=1;
 
 $(function () {
 
@@ -34,45 +30,64 @@ $(function () {
 });
 
 
-/*
-function polygonArea(X, Y)
-{
-   area = 0;
-   var j = nodes.length-1;
+var LineClass = function () {
+    this.name=name;
+    this.points = new Array();
+   // this.xCoC=new Array();
+   // this.yCoC=new Array();
 
-    for (var i=0; i<numPoints; i++){
-     area = area +  (X[j]+X[i]) * (Y[j]-Y[i]);
-        j = i;  //j is previous vertex to i
-    }
-    return area/2;
-}
-*/
-function redrawStoredLines() {
+    this.addLine= function(x,y){
+      this.points.push(x);
+        this.points.push(y);
+     };
+
+};
+
+
+function deleteAllLines() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(background, 0, 0);
+    line.points.length=0;
+    listOfLines.length=0;
+    //line.xCoC.length=0;
+    //line.yCoC.length=0;
+}
+
+function redrawStoredLines() {
 
 
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(background, 0, 0);
 
 
-      if (nodes.length == 0) {
-        return;
+    ctx.moveTo(listOfLines[0].points[i], listOfLines[i].points[i]);
+    ctx.lineTo(listOfLines[i].points[i], listOfLines[i].points[i]);
+
+    for(var i=0;i<listOfLines.length;i++){
+       /* var connector=connectors[i];
+        var box1=boxes[connector.box1];
+        var box2=boxes[connector.box2];*/
+        for (var j=0;j<listOfLines[i].points.length;j++){
+
+            ctx.beginPath();
+            ctx.moveTo(line.points[i], line.points[i]);
+            ctx.lineTo(box2.x + box2.w / 2, box2.y + box2.h / 2);
+            ctx.stroke();
+        }
     }
 
-    // redraw each stored line
-    for (var i = 0; i < nodes.length; i++) {
-        ctx.beginPath();
-        ctx.moveTo(xCo[i], yCo[i]);
-        ctx.lineTo(xCo[i+1], yCo[i+1]);
-        ctx.stroke();
-    }
 }
 
 function pinpoint() {
 
+    var nameofLine=prompt("enter the new line name: ");
+    line=new LineClass();
+    line.name=nameofLine;
+
 
     $("#floor-plan-canvas").click(function (e) {
         if (checkKeyPressed == false) {
-              var element = canvas;
+            var element = canvas;
             var offsetX = 0, offsetY = 0
 
             if (element.offsetParent) {
@@ -85,32 +100,18 @@ function pinpoint() {
             var x = e.pageX- offsetX;
             var y = e.pageY - offsetY;
 
-            if(((x-nodes[0]<50 && x-nodes[0]>0)||(x-nodes[0]<0 && x-nodes[0]>-50)) && ((y-nodes[1]<50 && y-nodes[1]>0)||(y-nodes[1]<0 && y-nodes[1]>-50)) ){
-
-                x=nodes[0];
-                y=nodes[1];
-
+            if(((x-line.points[0]<completionNumber && x-line.points[0]>0)||(x-line.points[0]<0 && x-line.points[0]>-completionNumber)) && ((y-line.points[1]<completionNumber && y-line.points[1]>0)||(y-line.points[1]<0 && y-line.points[1]>-completionNumber)) ){
+                x=line.points[0];
+                y=line.points[1];
             }
 
-
-            nodes.push(x);
-            nodes.push(y);
-            xCo.push(x);
-            yCo.push(y);
-
+            line.addLine(x,y)
             ctx.beginPath();
-            ctx.moveTo(nodes[nodes.length - 4], nodes[nodes.length - 3]);
-            ctx.lineTo(nodes[nodes.length - 2], nodes[nodes.length - 1]);
-
-           /* ctx.moveTo(xCo[counter], yCo[counter]);
-            ctx.lineTo(xCo[counter+1], yCo[counter+1]);*/
-
-
+            ctx.moveTo(line.points[line.points.length - 4], line.points[line.points.length - 3]);
+            ctx.lineTo(line.points[line.points.length - 2], line.points[line.points.length - 1]);
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ff0000';
             ctx.stroke();
-
-            clickCounter++;
 
         }
     });
@@ -118,16 +119,36 @@ function pinpoint() {
 
     $("body").keydown(function (event) {
 
-        xTriggered++;
+
         if (event.which == 65) {   //65: key "A"
 
+            keyAcounter++;
+
             event.preventDefault();
+
+            listOfLines.push(line);
+
             checkKeyPressed = true;
-            nameOfContext=prompt("Enter the name: ");
-            console.log(nodes.join());
-            console.log(nameOfContext);
+            //nameOfContext=prompt("Enter the name: ");
+
+            console.log(line.name);
+            console.log(line.points.join());
+            //console.log(nameOfContext);
             checkKeyPressed = false;
             nodes.length=0;
+
+
+            for(var i=0;i<listOfLines.length;i++) {
+                console.log(i +". line name is :"+ listOfLines[i].name);
+                console.log(i+". line has "+ (listOfLines[i].points.length)/2+" points");
+                console.log(i+". line has "+ (listOfLines[0].points.length)/2+" points");
+                console.log(listOfLines[i].points[i]);
+
+            }
+
+            var nameofLine=prompt("enter the"+keyAcounter+". line name: ");
+            line=new LineClass();
+            line.name=nameofLine;
         }
 
 
@@ -136,11 +157,14 @@ function pinpoint() {
             event.preventDefault();
             nodes.pop();
             nodes.pop();
-            xCo.pop();
-            yCo.pop();
-
             redrawStoredLines();
             removeLastLine = true;
+        }
+
+        else if (event.which == 68) {   //63: key "D"
+
+             deleteAllLines();
+
         }
 
     });
