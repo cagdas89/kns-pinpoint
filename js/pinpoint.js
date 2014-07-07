@@ -60,38 +60,46 @@ function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip array
 
 }
 
-function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırmak gerekiyor. 
+function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırmak gerekiyor.
 
-    var a = listOfLines[0].points[0];
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
 
-    for (var i = 1; i < listOfLines[0].points.length; i++) {
-        fnc(listOfLines[0].points[i]);
-    }
 
+    for (var j = 0; j < listOfLines.length; j++) {
+
+
+
+    var a = listOfLines[j].points[0];
+
+    for (var i = 1; i < listOfLines[j].points.length; i++) {
+        fnc(listOfLines[j].points[i]);
 
     function fnc(point) {
 
 
         ctx.moveTo(a.x, a.y);
-        console.log("move to ya giren a ile b: " + a.x + " " + a.y);
+        //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
         ctx.lineTo(point.x, point.y);
-        console.log("line to ya giren x ile y: " + point.x + " " + point.y);
+        //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
         ctx.lineWidth = 2;
-        ctx.strokeStyle = '#000000';
+
         ctx.stroke();
         a = point;
 
     }
+    }
+
+}
 
 }
 
 function pinpoint() {
 
-    var nameofLine = prompt("enter the new line name: ");
+
     line = new LineClass();
+    var nameofLine = prompt("enter the new line name: ");
     line.name = nameofLine;
 
 
@@ -107,8 +115,8 @@ function pinpoint() {
                 } while ((element = element.offsetParent));
             }
 
-            var x = e.pageX - offsetX;
-            var y = e.pageY - offsetY;
+            var x = e.pageX - offsetX-3;
+            var y = e.pageY - offsetY-3;
 
             //ilk tıklanan noktaya yakın bir yere tıklanınca otomatik tamamlama
             if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
@@ -126,6 +134,8 @@ function pinpoint() {
 
 
         }
+
+
     });
 
 
@@ -154,20 +164,34 @@ function pinpoint() {
         }
 
 
-        else if (event.which == 83) {   //"S" tuşuna basıldığı zaman
+        else if (event.which == 83) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
 
+            listOfLines.push(line);
+            alert("Line has been saved");
+
+            for(var i=0;i<listOfLines.length;i++) {
+                console.log(listOfLines[i].name);
+            }
+            checkKeyPressed=true;
+        }
+
+
+        else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo ama sorunlu
+
+            listOfLines.pop();
             redrawStoredLines();
+            keyAcounter=listOfLines.length;
+
 
         }
+
 
         else if (event.which == 68) {   //"D" tuşuna basıldığı zaman
 
             deleteAllLines();
+            keyAcounter=0;
 
         }
 
     });
 }
-
-
-
