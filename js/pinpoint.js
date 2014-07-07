@@ -1,11 +1,12 @@
 // When dom ready fire this.
 var canvas;
 var ctx;
-var listOfLines=new Array();
+var listOfLines = [];
 var checkKeyPressed = false;
 var background;
-var completionNumber=30;
-var keyAcounter=1;
+var completionNumber = 30;
+var keyAcounter = 1;
+var line;
 
 $(function () {
 
@@ -27,85 +28,102 @@ $(function () {
     };
 });
 
+var Point = function (x, y) {
+    this.x = x;
+    this.y = y;
+};
 
 var LineClass = function () {
-    this.name=name;
-    this.points = new Array();
-    this.addLine= function(x,y){
-      this.points.push(x);
-        this.points.push(y);
-     };
+    this.name = "";
+    this.points = [];
+    this.addLine = function (x, y) {
+        this.points.push(new Point(x, y));
+    };
+    this.toString = function () {
+        console.log("Name of line: " + this.name);
+        for (var i = 0; i < this.points.length; i++) {
+            console.log((i + 1) + ". coordinate of the line: " + this.points[i].x + ", " + this.points[i].y);
+
+        }
+
+    };
 
 };
 
 
-function deleteAllLines() {
+function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arraylerde tutulan koordinatları da siliyor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
-    line.points.length=0;
-    listOfLines.length=0;
+    line.points = [];
+    listOfLines = [];
 
 
 }
 
-function redrawStoredLines() {
+function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırmak gerekiyor. 
+
+    var a = listOfLines[0].points[0];
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(background, 0, 0);
+
+    for (var i = 1; i < listOfLines[0].points.length; i++) {
+        fnc(listOfLines[0].points[i]);
+    }
 
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(background, 0, 0);
+    function fnc(point) {
 
 
+        ctx.moveTo(a.x, a.y);
+        console.log("move to ya giren a ile b: " + a.x + " " + a.y);
+        ctx.lineTo(point.x, point.y);
+        console.log("line to ya giren x ile y: " + point.x + " " + point.y);
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = '#000000';
+        ctx.stroke();
+        a = point;
 
-        console.log(listOfLines[0].points[0]);
-
-/*
-        for (var j=0;j<line.length;j+=2){
-
-            ctx.beginPath();
-            ctx.moveTo(line.points[j], line.points[j+1]);
-            ctx.lineTo(line.points[j+2], line.points[j+3]);
-            ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ff0000';
-            ctx.stroke();
-        }
-*/
+    }
 
 }
 
 function pinpoint() {
 
-    var nameofLine=prompt("enter the new line name: ");
-    line=new LineClass();
-    line.name=nameofLine;
+    var nameofLine = prompt("enter the new line name: ");
+    line = new LineClass();
+    line.name = nameofLine;
 
 
     $("#floor-plan-canvas").click(function (e) {
         if (checkKeyPressed == false) {
             var element = canvas;
-            var offsetX = 0, offsetY = 0
+            var offsetX = 0, offsetY = 0;
 
-            if (element.offsetParent) {
+            if (element.offsetParent) {   //
                 do {
                     offsetX += element.offsetLeft;
                     offsetY += element.offsetTop;
                 } while ((element = element.offsetParent));
             }
 
-            var x = e.pageX- offsetX;
+            var x = e.pageX - offsetX;
             var y = e.pageY - offsetY;
 
-            if(((x-line.points[0]<completionNumber && x-line.points[0]>0)||(x-line.points[0]<0 && x-line.points[0]>-completionNumber)) && ((y-line.points[1]<completionNumber && y-line.points[1]>0)||(y-line.points[1]<0 && y-line.points[1]>-completionNumber)) ){
-                x=line.points[0];
-                y=line.points[1];
+            //ilk tıklanan noktaya yakın bir yere tıklanınca otomatik tamamlama
+            if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
+                x = line.points[0].x;
+                y = line.points[0].y;
             }
 
-            line.addLine(x,y)
+            line.addLine(x, y);   //line'ın koordinatlarını vererek canvas'a çizdirme
             ctx.beginPath();
-            ctx.moveTo(line.points[line.points.length - 4], line.points[line.points.length - 3]);
-            ctx.lineTo(line.points[line.points.length - 2], line.points[line.points.length - 1]);
+            ctx.moveTo(line.points[line.points.length - 2].x, line.points[line.points.length - 2].y); //çizginin başladığı nokta
+            ctx.lineTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y); //çizginin bittiği nokta
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ff0000';
             ctx.stroke();
+
 
         }
     });
@@ -114,74 +132,42 @@ function pinpoint() {
     $("body").keydown(function (event) {
 
 
-        if (event.which == 65) {   //65: key "A"
+        if (event.which == 65) {   //"A" tuşuna basıldığı zaman
 
             keyAcounter++;
 
             event.preventDefault();
 
-            listOfLines.push(line);
+            listOfLines.push(line); //Bütün line objelerinin tutulduğu array e line'ı atıyor
 
 
             checkKeyPressed = true;
-            //nameOfContext=prompt("Enter the name: ");
 
-            console.log(line.name);
-            console.log(line.points.join());
-            //console.log(nameOfContext);
+
+            line.toString();
             checkKeyPressed = false;
 
-   /*         for(var i=0;i<listOfLines.length;i++) {
-                console.log(i +". line name is :"+ listOfLines[i].name);
-                console.log(i+". line has "+ (listOfLines[i].points.length)/2+" points");
-                console.log(i+". line has "+ (listOfLines[0].points.length)/2+" points");
-                console.log(listOfLines[i].points[i]);
 
-            } */
-
-            var nameofLine=prompt("enter the"+keyAcounter+". line name: ");
-            line=new LineClass();
-            line.name=nameofLine;
+            var nameofLine = prompt("enter the" + keyAcounter + ". line name: ");
+            line = new LineClass();
+            line.name = nameofLine;
         }
 
 
-       else if (event.which == 83) {   //83: key "S" ---kaos
+        else if (event.which == 83) {   //"S" tuşuna basıldığı zaman
 
-            event.preventDefault();
-            line.points.pop();
-            line.points.pop();
             redrawStoredLines();
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(background, 0, 0);
-
-
-
-            console.log("aaaaaaaaaaaa"+listOfLines[0].points[0]);
-
-
-            for (var j=0;j<line.length;j+=2){
-
-                ctx.beginPath();
-                ctx.moveTo(line.points[j], line.points[j+1]);
-                ctx.lineTo(line.points[j+2], line.points[j+3]);
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ff0000';
-                ctx.stroke();
-            }
-
-
-
         }
 
-        else if (event.which == 68) {   //68: key "D"
+        else if (event.which == 68) {   //"D" tuşuna basıldığı zaman
 
-             deleteAllLines();
+            deleteAllLines();
 
         }
 
     });
-};
+}
 
 
 
