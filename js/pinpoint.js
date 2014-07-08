@@ -186,6 +186,7 @@ function pinpoint() {
 
         if (event.which == 65) {   //"A" tuşuna basıldığı zaman
 
+
           if(keyAblocker==false) {
               keyAcounter++;
 
@@ -203,19 +204,16 @@ function pinpoint() {
               var nameofLine = prompt("enter the" + keyAcounter + ". line name: ");
               line = new LineClass();
               line.name = nameofLine;
+              keyAblocker=true;
           }
 
-              keyAblocker==true;
+
 
 
         }
 
 
         else if (event.which == 83) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
-
-
-
-
 
                 listOfLines.push(line);
 
@@ -227,7 +225,7 @@ function pinpoint() {
 
 
             checkKeyPressed = true;
-            keyAblocker==false;
+            keyAblocker=false;
 
         }
 
@@ -240,7 +238,7 @@ function pinpoint() {
             }
             redrawStoredLines();
             keyAcounter = listOfLines.length;
-
+            keyAblocker=false;
 
         }
 
@@ -249,7 +247,7 @@ function pinpoint() {
 
             deleteAllLines();
             keyAcounter = 0;
-
+            keyAblocker=false;
         }
 
     });
