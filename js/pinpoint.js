@@ -122,7 +122,41 @@ function pinpoint() {
             if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
                 x = line.points[0].x;
                 y = line.points[0].y;
+                console.log("ilk if e giren x ve y"+x+" "+y);
+
             }
+
+
+          else if((line.points.length==1) &&  ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))    ){
+                x = line.points[0].x;
+                console.log("ikinci e giren x ve y"+x+" "+y);
+
+            }
+
+            else if((line.points.length==1) &&  ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber))    ){
+                y = line.points[0].y;
+                console.log("üçüncü if e giren x ve y"+x+" "+y);
+
+            }
+
+      /*      else if((line.points.length>1) && ((x - line.points[line.points.length-1].x < completionNumber && x - line.points[line.points.length-1].x > 0) || (x - line.points[line.points.length-1].x < 0 && x - line.points[line.points.length-1].x > -completionNumber))){
+                x = line.points[line.points.length-2].x;
+                console.log("dördüncü if e giren x ve y"+x+" "+y);
+                for(var i=0;i<line.points.length;i++){
+                    console.log("dördüncü coo: "+line.points[i].x+" "+line.points[i].y);
+
+                }
+            }
+
+            else if((line.points.length>1) && ((y - line.points[line.points.length-1].y < completionNumber && y - line.points[line.points.length-1].y > 0) || (y - line.points[line.points.length-1].y < 0 && y - line.points[line.points.length-1].y > -completionNumber))){
+                y = line.points[line.points.length-2].y;
+                console.log("sonuncu if e giren x ve y"+x+" "+y);
+                for(var i=0;i<line.points.length;i++){
+                    console.log("sonuncu coo: "+line.points[i].x+" "+line.points[i].y);
+
+                }
+            }
+*/
 
             line.addLine(x, y);   //line'ın koordinatlarını vererek canvas'a çizdirme
             ctx.beginPath();
