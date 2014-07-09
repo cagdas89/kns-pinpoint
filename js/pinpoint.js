@@ -8,6 +8,8 @@ var completionNumber = 30;
 var keyAcounter = 1;
 var line;
 var keyAblocker=false;
+var keySblocker=false;
+
 
 $(function () {
 
@@ -184,7 +186,7 @@ function pinpoint() {
     $("body").keydown(function (event) {
 
 
-        if (event.which == 65) {   //"A" tuşuna basıldığı zaman
+        if (event.which == 65  && listOfLines.length !=0) {   //"A" tuşuna basıldığı zaman
 
 
           if(keyAblocker==false) {
@@ -205,6 +207,7 @@ function pinpoint() {
               line = new LineClass();
               line.name = nameofLine;
               keyAblocker=true;
+              keySblocker=false;
           }
 
 
@@ -214,19 +217,20 @@ function pinpoint() {
 
 
         else if (event.which == 83) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
-
+            if(keySblocker==false && line.points.length != 0 ) {   //line.lenght le ilgili bişey lazım
                 listOfLines.push(line);
 
-               alert("Line has been saved");
+                alert("Line has been saved");
 
                 for (var i = 0; i < listOfLines.length; i++) {
                     console.log(listOfLines[i].name);
                 }
 
 
-            checkKeyPressed = true;
-            keyAblocker=false;
-
+                checkKeyPressed = true;
+                keyAblocker = false;
+                keySblocker=true;
+            }
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
