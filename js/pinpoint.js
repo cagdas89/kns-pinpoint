@@ -2,6 +2,7 @@
 var canvas;
 var ctx;
 var listOfLines = [];
+var linesFromJSON=[];
 var checkKeyPressed = false;
 var background;
 var completionNumber = 30;
@@ -29,11 +30,9 @@ $(function () {
         // yani asıl işi yapacak fonksiyonu çağırabiliriz.
         ctx.drawImage(background, 0, 0);
 
-        alert("To load json data, press L");
+        alert("To draw json data press L, to draw new line press A ");
 
         pinpoint();
-
-
 
     };
 });
@@ -75,9 +74,11 @@ function parseFromJson (){
                   line.addLine(point.x, point.y);
               }
 
-              listOfLines.push(line);
+              linesFromJSON.push(line);
               drawAllLines();
+
           }
+
 
           });
 
@@ -113,6 +114,33 @@ function drawAllLines (){
 
 
 }
+
+    for (var j = 0; j < linesFromJSON.length; j++) {
+
+        for (var i = 0; i < linesFromJSON[j].points.length; i++) {
+            if (i == 0) {
+
+                var a = linesFromJSON[j].points[0];
+                ctx.moveTo(a.x, a.y);
+            }
+
+            else {
+                fnc(linesFromJSON[j].points[i]);
+            }
+            function fnc(point) {
+                // ctx.moveTo(a.x, a.y);
+                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
+                ctx.lineTo(point.x, point.y);
+                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
+                ctx.lineWidth = 2;
+
+                ctx.stroke();
+
+            }
+        }
+
+
+    }
 
 }
 
@@ -166,8 +194,8 @@ function pinpoint() {
 
 
     line = new Polygon();
-    var nameofLine = prompt("enter the new line name: ");
-    line.name = nameofLine;
+   // var nameofLine = prompt("enter the new line name: ");
+   // line.name = nameofLine;
 
 
     $("#floor-plan-canvas").click(function (e) {
@@ -244,10 +272,8 @@ function pinpoint() {
     $("body").keydown(function (event) {
 
 
-        if (event.which == 65  && listOfLines.length !=0) {   //"A" tuşuna basıldığı zaman
+        if (event.which == 65 && keyAblocker==false) {   //"A" tuşuna basıldığı zaman
 
-
-          if(keyAblocker==false) {
               keyAcounter++;
 
               event.preventDefault();
@@ -266,7 +292,7 @@ function pinpoint() {
               line.name = nameofLine;
               keyAblocker=true;
               keySblocker=false;
-          }
+
         }
 
 
