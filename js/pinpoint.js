@@ -3,7 +3,7 @@ var canvas;
 var ctx;
 var listOfLines = [];
 var linesFromJSON=[];
-var checkKeyPressed = false;
+var checkKeyPressed = true;
 var background;
 var completionNumber = 30;
 var keyAcounter = 1;
@@ -31,7 +31,7 @@ $(function () {
         ctx.drawImage(background, 0, 0);
 
         alert("To draw json data press L, to draw new line press A ");
-
+        parseFromJson();
         pinpoint();
 
     };
@@ -60,60 +60,37 @@ var Polygon = function () {
 };
 function parseFromJson (){
 
-
-
       $.getJSON( "test.json", function( data ) {
-           var polygons = data.polygons;
-          for(var i = 0; i< polygons.length ; i++) {
-              var polygon = polygons[i];
 
+           var polygons = data.polygons;
+
+          for(var i = 0; i< polygons.length ; i++) {
+
+              var polygon = polygons[i];
               line = new Polygon();
               line.name=polygon.name;
+
               for(var j=0; j < polygon.points.length; j++) {
+
                   var point = polygon.points[j];
                   line.addLine(point.x, point.y);
               }
-
               linesFromJSON.push(line);
-              drawAllLines();
-
           }
-
-
           });
-
-
-
 
     }
 
-function drawAllLines (){
-    for (var j = 0; j < listOfLines.length; j++) {
-
-        for (var i = 0; i < listOfLines[j].points.length; i++) {
-            if (i == 0) {
-
-                var a = listOfLines[j].points[0];
-                ctx.moveTo(a.x, a.y);
-            }
-
-            else {
-                fnc(listOfLines[j].points[i]);
-            }
-            function fnc(point) {
-                // ctx.moveTo(a.x, a.y);
-                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
-                ctx.lineTo(point.x, point.y);
-                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
-                ctx.lineWidth = 2;
-
-                ctx.stroke();
-
-            }
-        }
+function drawJSONLines (){
 
 
-}
+console.log(linesFromJSON.join());
+    console.log("----------------------");
+    console.log(listOfLines.join());
+    console.log("----------------------");
+    //console.log(line.points.join());
+
+
 
     for (var j = 0; j < linesFromJSON.length; j++) {
 
@@ -139,18 +116,28 @@ function drawAllLines (){
             }
         }
 
-
     }
 
 }
+
+
+function writingJSON() {
+
+   for(var i=0;i<listOfLines.length;i++) {
+
+       console.log(JSON.stringify(listOfLines[i]));
+   }
+}
+
+
+
 
 function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arraylerde tutulan koordinatları da siliyor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
     line.points = [];
     listOfLines = [];
-
-
+    redrawStoredLines();
 }
 
 function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırmak gerekiyor.
@@ -163,6 +150,7 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
     for (var j = 0; j < listOfLines.length; j++) {
 
         for (var i = 0; i < listOfLines[j].points.length; i++) {
+
             if (i == 0) {
 
             var a = listOfLines[j].points[0];
@@ -188,6 +176,21 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
 
     }
 
+}
+
+
+function openWindow()
+{
+    var myWindow = window.open("", "myWindow", "width=200, height=100");    // Opens a new window
+
+    var outputData = {
+        polygons: listOfLines
+    };
+    //for(var i=0;i<listOfLines.length;i++) {
+
+        myWindow.document.write(JSON.stringify(outputData));
+
+    //}
 }
 
 function pinpoint() {
@@ -217,6 +220,7 @@ function pinpoint() {
             if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
                 x = line.points[0].x;
                 y = line.points[0].y;
+
                             }
 
             /*
@@ -279,7 +283,7 @@ function pinpoint() {
               event.preventDefault();
 
 
-              checkKeyPressed = true;
+
 
 
               //line.toString();
@@ -296,8 +300,8 @@ function pinpoint() {
         }
 
 
-        else if (event.which == 83) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
-            if(keySblocker==false && line.points.length != 0 ) {
+        else if (event.which == 83 && keySblocker==false && line.points.length != 0) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
+
                 listOfLines.push(line);
 
                 alert("Line has been saved");
@@ -306,11 +310,10 @@ function pinpoint() {
                     console.log(listOfLines[i].name);
                 }
 
-
                 checkKeyPressed = true;
                 keyAblocker = false;
                 keySblocker=true;
-            }
+
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
@@ -323,7 +326,7 @@ function pinpoint() {
             redrawStoredLines();
             keyAcounter = listOfLines.length;
             keyAblocker=false;
-
+            keyLblocker=false;
         }
 
 
@@ -336,14 +339,18 @@ function pinpoint() {
         }
 
 
-        else if (event.which == 76) {   //"L" tuşuna basıldığı zaman
-            if (keyLblocker == false) {
+        else if (event.which == 76 && keyLblocker == false) {   //"L" tuşuna basıldığı zaman
+
                 console.log("l pressed");
-                parseFromJson();
+                drawJSONLines();
                 checkKeyPressed = true;
                 keyLblocker=true;
 
-            }
+        }
+
+        else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
+
+            openWindow();
         }
     });
 }
