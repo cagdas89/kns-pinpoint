@@ -8,3 +8,15 @@ body {
     margin: 50px auto;
     display: block;
 }
+
+article
+{
+
+    margin:auto;
+    margin-top:10px;
+}
+
+
+input[type='file']{
+    margin:10px;
+}

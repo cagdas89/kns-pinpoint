@@ -11,6 +11,7 @@ var line;
 var keyAblocker=false;
 var keySblocker=false;
 var keyLblocker=false;
+var JsonObj = null;
 
 
 $(function () {
@@ -81,7 +82,7 @@ function parseFromJson (){
 
     }
 
-function drawJSONLines (){
+function drawAllLines (){
 
 
 console.log(linesFromJSON.join());
@@ -90,7 +91,31 @@ console.log(linesFromJSON.join());
     console.log("----------------------");
     //console.log(line.points.join());
 
+    for (var j = 0; j < listOfLines.length; j++) {
 
+        for (var i = 0; i < listOfLines[j].points.length; i++) {
+            if (i == 0) {
+
+                var a = listOfLines[j].points[0];
+                ctx.moveTo(a.x, a.y);
+            }
+
+            else {
+                fnc(listOfLines[j].points[i]);
+            }
+            function fnc(point) {
+                // ctx.moveTo(a.x, a.y);
+                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
+                ctx.lineTo(point.x, point.y);
+                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
+                ctx.lineWidth = 2;
+
+                ctx.stroke();
+
+            }
+        }
+
+    }
 
     for (var j = 0; j < linesFromJSON.length; j++) {
 
@@ -119,17 +144,6 @@ console.log(linesFromJSON.join());
     }
 
 }
-
-
-function writingJSON() {
-
-   for(var i=0;i<listOfLines.length;i++) {
-
-       console.log(JSON.stringify(listOfLines[i]));
-   }
-}
-
-
 
 
 function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arraylerde tutulan koordinatları da siliyor
@@ -181,17 +195,69 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
 
 function openWindow()
 {
-    var myWindow = window.open("", "myWindow", "width=200, height=100");    // Opens a new window
+    var myWindow = window.open("", "myWindow", "width=500, height=800");    // Opens a new window
 
     var outputData = {
         polygons: listOfLines
     };
-    //for(var i=0;i<listOfLines.length;i++) {
 
-        myWindow.document.write(JSON.stringify(outputData));
 
-    //}
+        myWindow.document.write("<pre>" + JSON.stringify(outputData, null, 2) + "</pre>");
+
+
 }
+
+
+window.onload = function() {
+
+
+    if (window.File && window.FileList && window.FileReader) {
+        var filesInput = document.getElementById("files");
+
+        filesInput.addEventListener("change", function(event) {
+
+            var files = event.target.files;
+            var output = document.getElementById("result");
+
+            for (var i = 0; i < files.length; i++) {
+                var file = files[i];
+
+
+                if (!file.type.match('plain')) continue;
+
+                var picReader = new FileReader();
+
+                picReader.addEventListener("load", function(event) {
+
+                    var textFile = event.target;
+
+                    var div = document.createElement("div");
+
+                    div.innerText = textFile.result;
+
+                    output.insertBefore(div, null);
+
+                    var obj=textFile.result;
+                    listOfLines = JSON.parse(obj).polygons;
+                    console.log(JSON.stringify(JSON.parse(obj), null, 2));
+
+
+                });
+
+                picReader.readAsText(file);
+
+
+            }
+
+        });
+    }
+    else {
+        console.log("Your browser does not support File API");
+    }
+}
+
+
+
 
 function pinpoint() {
 
@@ -206,7 +272,7 @@ function pinpoint() {
             var element = canvas;
             var offsetX = 0, offsetY = 0;
 
-            if (element.offsetParent) {   //
+            if (element.offsetParent) {
                 do {
                     offsetX += element.offsetLeft;
                     offsetY += element.offsetTop;
@@ -221,7 +287,7 @@ function pinpoint() {
                 x = line.points[0].x;
                 y = line.points[0].y;
 
-                            }
+                }
 
             /*
             else if ((line.points.length == 1) && ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))) {
@@ -282,10 +348,6 @@ function pinpoint() {
 
               event.preventDefault();
 
-
-
-
-
               //line.toString();
 
               checkKeyPressed = false;
@@ -342,7 +404,7 @@ function pinpoint() {
         else if (event.which == 76 && keyLblocker == false) {   //"L" tuşuna basıldığı zaman
 
                 console.log("l pressed");
-                drawJSONLines();
+                drawAllLines();
                 checkKeyPressed = true;
                 keyLblocker=true;
 
@@ -351,6 +413,7 @@ function pinpoint() {
         else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
 
             openWindow();
+            handleFileSelect();
         }
     });
 }
