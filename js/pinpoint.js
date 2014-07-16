@@ -2,16 +2,13 @@
 var canvas;
 var ctx;
 var listOfLines = [];
-var linesFromJSON=[];
 var checkKeyPressed = true;
 var background;
 var completionNumber = 30;
-var keyAcounter = 1;
 var line;
-var keyAblocker=false;
-var keySblocker=false;
-var keyLblocker=false;
-var JsonObj = null;
+var keyAblocker = false;
+var keySblocker = false;
+var keyLblocker = false;
 
 
 $(function () {
@@ -24,17 +21,13 @@ $(function () {
     // background olarak atıyoruz.
     background = new Image();
     background.src = "http://sypiazza.s3.amazonaws.com/images/floors/16_original.png?1391002511";
-
     background.onload = function () {
         // Resim browser tarafından indirilince fire edildiği
         // için burda background 'ı set edip, pinpoint fonksiyonunu
         // yani asıl işi yapacak fonksiyonu çağırabiliriz.
         ctx.drawImage(background, 0, 0);
-
-        alert("To draw json data press L, to draw new line press A ");
-        parseFromJson();
+        alert("To create new line press A, to load existed lines choose a Text or JSON file");
         pinpoint();
-
     };
 });
 
@@ -49,47 +42,15 @@ var Polygon = function () {
     this.addLine = function (x, y) {
         this.points.push(new Point(x, y));
     };
-    this.toString = function () {
+        this.toString = function () {
         console.log("Name of line: " + this.name);
         for (var i = 0; i < this.points.length; i++) {
             console.log((i + 1) + ". coordinate of the line: " + this.points[i].x + ", " + this.points[i].y);
-
         }
-
     };
-
 };
-function parseFromJson (){
 
-      $.getJSON( "test.json", function( data ) {
-
-           var polygons = data.polygons;
-
-          for(var i = 0; i< polygons.length ; i++) {
-
-              var polygon = polygons[i];
-              line = new Polygon();
-              line.name=polygon.name;
-
-              for(var j=0; j < polygon.points.length; j++) {
-
-                  var point = polygon.points[j];
-                  line.addLine(point.x, point.y);
-              }
-              linesFromJSON.push(line);
-          }
-          });
-
-    }
-
-function drawAllLines (){
-
-
-console.log(linesFromJSON.join());
-    console.log("----------------------");
-    console.log(listOfLines.join());
-    console.log("----------------------");
-    //console.log(line.points.join());
+function drawAllLines() {
 
     for (var j = 0; j < listOfLines.length; j++) {
 
@@ -99,54 +60,21 @@ console.log(linesFromJSON.join());
                 var a = listOfLines[j].points[0];
                 ctx.moveTo(a.x, a.y);
             }
-
             else {
                 fnc(listOfLines[j].points[i]);
             }
             function fnc(point) {
-                // ctx.moveTo(a.x, a.y);
-                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
+
                 ctx.lineTo(point.x, point.y);
-                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
                 ctx.lineWidth = 2;
-
                 ctx.stroke();
-
             }
         }
-
     }
-
-    for (var j = 0; j < linesFromJSON.length; j++) {
-
-        for (var i = 0; i < linesFromJSON[j].points.length; i++) {
-            if (i == 0) {
-
-                var a = linesFromJSON[j].points[0];
-                ctx.moveTo(a.x, a.y);
-            }
-
-            else {
-                fnc(linesFromJSON[j].points[i]);
-            }
-            function fnc(point) {
-                // ctx.moveTo(a.x, a.y);
-                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
-                ctx.lineTo(point.x, point.y);
-                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
-                ctx.lineWidth = 2;
-
-                ctx.stroke();
-
-            }
-        }
-
-    }
-
 }
 
 
-function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arraylerde tutulan koordinatları da siliyor
+function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arrayde tutulan koordinatları da siliyor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
     line.points = [];
@@ -154,8 +82,8 @@ function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip array
     redrawStoredLines();
 }
 
-function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırmak gerekiyor.
 
+function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için bütün canvas'ı temizleyip geri kalanı yeniden yazdırıyor.
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
@@ -167,88 +95,63 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
 
             if (i == 0) {
 
-            var a = listOfLines[j].points[0];
-            ctx.moveTo(a.x, a.y);
-        }
+                var a = listOfLines[j].points[0];
+                ctx.moveTo(a.x, a.y);
+            }
 
             else {
                 fnc(listOfLines[j].points[i]);
             }
             function fnc(point) {
 
-
-               // ctx.moveTo(a.x, a.y);
-                //console.log("move to ya giren a ile b: " + a.x + " " + a.y);
                 ctx.lineTo(point.x, point.y);
-                //console.log("line to ya giren x ile y: " + point.x + " " + point.y);
+
                 ctx.lineWidth = 2;
 
                 ctx.stroke();
-
             }
         }
-
     }
-
 }
 
 
-function openWindow()
-{
+function openWindow() { //listOfLines daki koordinatları yeni bir pencerede açıp JSON formatında yazdırıyor
+
     var myWindow = window.open("", "myWindow", "width=500, height=800");    // Opens a new window
 
     var outputData = {
         polygons: listOfLines
     };
 
-
-        myWindow.document.write("<pre>" + JSON.stringify(outputData, null, 2) + "</pre>");
-
-
+    myWindow.document.write("<pre>" + JSON.stringify(outputData, null, 2) + "</pre>");
 }
 
 
-window.onload = function() {
+window.onload = function () { //file api kullanarak localden text veya JSON dosyasını parse edip çizdiriyor
 
 
     if (window.File && window.FileList && window.FileReader) {
+
         var filesInput = document.getElementById("files");
 
-        filesInput.addEventListener("change", function(event) {
+        filesInput.addEventListener("change", function (event) {
 
             var files = event.target.files;
-            var output = document.getElementById("result");
 
             for (var i = 0; i < files.length; i++) {
                 var file = files[i];
 
-
-                if (!file.type.match('plain')) continue;
-
                 var picReader = new FileReader();
 
-                picReader.addEventListener("load", function(event) {
+                picReader.addEventListener("load", function (event) {
 
                     var textFile = event.target;
-
-                    var div = document.createElement("div");
-
-                    div.innerText = textFile.result;
-
-                    output.insertBefore(div, null);
-
-                    var obj=textFile.result;
+                    var obj = textFile.result;
                     listOfLines = JSON.parse(obj).polygons;
-                    console.log(JSON.stringify(JSON.parse(obj), null, 2));
-
-
+                    drawAllLines();
                 });
-
                 picReader.readAsText(file);
-
-
             }
-
         });
     }
     else {
@@ -257,15 +160,9 @@ window.onload = function() {
 }
 
 
-
-
 function pinpoint() {
 
-
     line = new Polygon();
-   // var nameofLine = prompt("enter the new line name: ");
-   // line.name = nameofLine;
-
 
     $("#floor-plan-canvas").click(function (e) {
         if (checkKeyPressed == false) {
@@ -287,22 +184,22 @@ function pinpoint() {
                 x = line.points[0].x;
                 y = line.points[0].y;
 
-                }
+            }
 
             /*
-            else if ((line.points.length == 1) && ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))) {
-                x = line.points[0].x;
-                console.log("ikinci e giren x ve y" + x + " " + y);
+             else if ((line.points.length == 1) && ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))) {
+             x = line.points[0].x;
+             console.log("ikinci e giren x ve y" + x + " " + y);
 
-            }
+             }
 
-            else if ((line.points.length == 1) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber))) {
-                y = line.points[0].y;
-                console.log("üçüncü if e giren x ve y" + x + " " + y);
+             else if ((line.points.length == 1) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber))) {
+             y = line.points[0].y;
+             console.log("üçüncü if e giren x ve y" + x + " " + y);
 
-            }
+             }
 
-                else if((line.points.length>1) && ((x - line.points[line.points.length-1].x < completionNumber && x - line.points[line.points.length-1].x > 0) || (x - line.points[line.points.length-1].x < 0 && x - line.points[line.points.length-1].x > -completionNumber))){
+             else if((line.points.length>1) && ((x - line.points[line.points.length-1].x < completionNumber && x - line.points[line.points.length-1].x > 0) || (x - line.points[line.points.length-1].x < 0 && x - line.points[line.points.length-1].x > -completionNumber))){
              x = line.points[line.points.length-2].x;
              console.log("dördüncü if e giren x ve y"+x+" "+y);
              for(var i=0;i<line.points.length;i++){
@@ -323,7 +220,8 @@ function pinpoint() {
              */
 
             line.addLine(x, y);//line'ın koordinatlarını vererek canvas'a çizdirme
-            if(line.points.length>1) {
+
+            if (line.points.length > 1) {
 
                 ctx.beginPath();
                 ctx.moveTo(line.points[line.points.length - 2].x, line.points[line.points.length - 2].y); //çizginin başladığı nokta
@@ -332,88 +230,56 @@ function pinpoint() {
                 ctx.strokeStyle = '#ff0000';
                 ctx.stroke();
             }
-
         }
-
-
     });
 
 
     $("body").keydown(function (event) {
 
+        if (event.which == 65 && keyAblocker == false) {   //"A" tuşuna basıldığı zaman
 
-        if (event.which == 65 && keyAblocker==false) {   //"A" tuşuna basıldığı zaman
+            event.preventDefault();
 
-              keyAcounter++;
+            checkKeyPressed = false;
 
-              event.preventDefault();
-
-              //line.toString();
-
-              checkKeyPressed = false;
-
-
-              var nameofLine = prompt("enter the new line name: ");
-              line = new Polygon();
-              line.name = nameofLine;
-              keyAblocker=true;
-              keySblocker=false;
-
+            var nameofLine = prompt("enter the new line name: ");
+            line = new Polygon();
+            line.name = nameofLine;
+            keyAblocker = true;
+            keySblocker = false;
         }
 
+        else if (event.which == 83 && keySblocker == false && line.points.length != 0) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
 
-        else if (event.which == 83 && keySblocker==false && line.points.length != 0) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
+            listOfLines.push(line);
 
-                listOfLines.push(line);
+            alert("Line has been saved");
 
-                alert("Line has been saved");
-
-                for (var i = 0; i < listOfLines.length; i++) {
-                    console.log(listOfLines[i].name);
-                }
-
-                checkKeyPressed = true;
-                keyAblocker = false;
-                keySblocker=true;
-
+            checkKeyPressed = true;
+            keyAblocker = false;
+            keySblocker = true;
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
-            if(line){
-                line=null;
+            if (line) {
+                line = null;
             }
             else {
                 listOfLines.pop();
             }
             redrawStoredLines();
-            keyAcounter = listOfLines.length;
-            keyAblocker=false;
-            keyLblocker=false;
+            keyAblocker = false;
+            keyLblocker = false;
         }
-
 
         else if (event.which == 68) {   //"D" tuşuna basıldığı zaman
-
             deleteAllLines();
-            keyAcounter = 0;
-            keyAblocker=false;
-            keyLblocker=false;
-        }
-
-
-        else if (event.which == 76 && keyLblocker == false) {   //"L" tuşuna basıldığı zaman
-
-                console.log("l pressed");
-                drawAllLines();
-                checkKeyPressed = true;
-                keyLblocker=true;
-
+            keyAblocker = false;
+            keyLblocker = false;
         }
 
         else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
-
             openWindow();
-            handleFileSelect();
         }
     });
 }
