@@ -11,6 +11,9 @@ var keySblocker = false;
 var keyLblocker = false;
 
 
+//S YE BASINCA OTOMATİK TAMAMLASIN
+
+
 $(function () {
 
     // Döküman yüklendiği zaman direkt bunu çağırıyor.
@@ -42,7 +45,7 @@ var Polygon = function () {
     this.addLine = function (x, y) {
         this.points.push(new Point(x, y));
     };
-        this.toString = function () {
+    this.toString = function () {
         console.log("Name of line: " + this.name);
         for (var i = 0; i < this.points.length; i++) {
             console.log((i + 1) + ". coordinate of the line: " + this.points[i].x + ", " + this.points[i].y);
@@ -114,6 +117,19 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
     }
 }
 
+function checkNames(vrb) {
+    for (var i = 0; i < listOfLines.length; i++) {
+        if (vrb == listOfLines[i].name) {
+            alert("The name you entered is not available. Enter a diffrent name");
+            checkKeyPressed = true;
+            keyAblocker = false;
+            return false;
+        }
+    }
+    keyAblocker = false;
+    return true;
+}
+
 
 function openWindow() { //listOfLines daki koordinatları yeni bir pencerede açıp JSON formatında yazdırıyor
 
@@ -180,13 +196,15 @@ function pinpoint() {
             var y = e.pageY - offsetY - 3;
 
             //ilk tıklanan noktaya yakın bir yere tıklanınca otomatik tamamlama
-            if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
-                x = line.points[0].x;
-                y = line.points[0].y;
-
-            }
-
             /*
+
+
+             if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
+             x = line.points[0].x;
+             y = line.points[0].y;
+             }
+
+
              else if ((line.points.length == 1) && ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))) {
              x = line.points[0].x;
              console.log("ikinci e giren x ve y" + x + " " + y);
@@ -241,17 +259,30 @@ function pinpoint() {
             event.preventDefault();
 
             checkKeyPressed = false;
+            keyAblocker = true;
 
             var nameofLine = prompt("enter the new line name: ");
-            line = new Polygon();
-            line.name = nameofLine;
-            keyAblocker = true;
+
+            if (checkNames(nameofLine) == true) {
+                line = new Polygon();
+                line.name = nameofLine;
+            }
+
             keySblocker = false;
         }
 
         else if (event.which == 83 && keySblocker == false && line.points.length != 0) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
 
             listOfLines.push(line);
+
+
+
+            ctx.beginPath();
+            ctx.moveTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y); //çizginin başladığı nokta
+            ctx.lineTo(line.points[0].x, line.points[0].y);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#ff0000';
+            ctx.stroke();
 
             alert("Line has been saved");
 
