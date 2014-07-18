@@ -11,8 +11,6 @@ var keySblocker = false;
 var keyLblocker = false;
 
 
-//S YE BASINCA OTOMATİK TAMAMLASIN
-
 
 $(function () {
 
@@ -34,10 +32,12 @@ $(function () {
     };
 });
 
+
 var Point = function (x, y) {
     this.x = x;
     this.y = y;
 };
+
 
 var Polygon = function () {
     this.name = "";
@@ -53,13 +53,14 @@ var Polygon = function () {
     };
 };
 
+
 function drawAllLines() {
 
     for (var j = 0; j < listOfLines.length; j++) {
 
         for (var i = 0; i < listOfLines[j].points.length; i++) {
-            if (i == 0) {
 
+            if (i == 0) {
                 var a = listOfLines[j].points[0];
                 ctx.moveTo(a.x, a.y);
             }
@@ -69,10 +70,16 @@ function drawAllLines() {
             function fnc(point) {
 
                 ctx.lineTo(point.x, point.y);
+
                 ctx.lineWidth = 2;
+
                 ctx.stroke();
             }
         }
+        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length-1].x,listOfLines[j].points[listOfLines[j].points.length-1].y);
+        ctx.lineTo(listOfLines[j].points[0].x,listOfLines[j].points[0].y);
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
 }
 
@@ -114,10 +121,16 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
                 ctx.stroke();
             }
         }
+        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length-1].x,listOfLines[j].points[listOfLines[j].points.length-1].y);
+        ctx.lineTo(listOfLines[j].points[0].x,listOfLines[j].points[0].y);
+        ctx.lineWidth = 2;
+        ctx.stroke();
     }
+
 }
 
-function checkNames(vrb) {
+
+function checkNames(vrb) { //Line lara aynı ismin verilmemesi için
     for (var i = 0; i < listOfLines.length; i++) {
         if (vrb == listOfLines[i].name) {
             alert("The name you entered is not available. Enter a diffrent name");
@@ -143,6 +156,21 @@ function openWindow() { //listOfLines daki koordinatları yeni bir pencerede aç
 }
 
 
+function writingAllLinesToDiv() {
+
+    var container = document.getElementById("list");
+    var div;
+
+    $( "#list" ).empty();
+
+    for(var i=0;i<listOfLines.length;i++) {
+        div = document.createElement('div');
+        div.innerHTML = listOfLines[i].name;
+        container.appendChild(div);
+    }
+}
+
+
 window.onload = function () { //file api kullanarak localden text veya JSON dosyasını parse edip çizdiriyor
 
 
@@ -162,11 +190,15 @@ window.onload = function () { //file api kullanarak localden text veya JSON dosy
                 picReader.addEventListener("load", function (event) {
 
                     var textFile = event.target;
+
                     var obj = textFile.result;
                     listOfLines = JSON.parse(obj).polygons;
                     drawAllLines();
+                    writingAllLinesToDiv();
+
                 });
                 picReader.readAsText(file);
+
             }
         });
     }
@@ -174,6 +206,19 @@ window.onload = function () { //file api kullanarak localden text veya JSON dosy
         console.log("Your browser does not support File API");
     }
 }
+
+
+function writingNamestoDiv() {
+
+    var container = document.getElementById("list");
+    var div;
+
+    div = document.createElement('div');
+    div.innerHTML = listOfLines[listOfLines.length - 1].name;
+    div.style.color="white";
+    container.appendChild(div);
+}
+
 
 
 function pinpoint() {
@@ -242,8 +287,8 @@ function pinpoint() {
             if (line.points.length > 1) {
 
                 ctx.beginPath();
-                ctx.moveTo(line.points[line.points.length - 2].x, line.points[line.points.length - 2].y); //çizginin başladığı nokta
-                ctx.lineTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y); //çizginin bittiği nokta
+                ctx.moveTo(line.points[line.points.length - 2].x, line.points[line.points.length - 2].y);
+                ctx.lineTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y);
                 ctx.lineWidth = 2;
                 ctx.strokeStyle = '#ff0000';
                 ctx.stroke();
@@ -263,7 +308,7 @@ function pinpoint() {
 
             var nameofLine = prompt("enter the new line name: ");
 
-            if (checkNames(nameofLine) == true) {
+           if (checkNames(nameofLine) == true) {
                 line = new Polygon();
                 line.name = nameofLine;
             }
@@ -274,11 +319,8 @@ function pinpoint() {
         else if (event.which == 83 && keySblocker == false && line.points.length != 0) {   //"S" tuşuna basıldığı zaman line'ı array'e atıyor.
 
             listOfLines.push(line);
-
-
-
             ctx.beginPath();
-            ctx.moveTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y); //çizginin başladığı nokta
+            ctx.moveTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y);
             ctx.lineTo(line.points[0].x, line.points[0].y);
             ctx.lineWidth = 2;
             ctx.strokeStyle = '#ff0000';
@@ -286,9 +328,13 @@ function pinpoint() {
 
             alert("Line has been saved");
 
+            writingNamestoDiv();
+
             checkKeyPressed = true;
             keyAblocker = false;
             keySblocker = true;
+            line=null;
+            
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
@@ -299,6 +345,7 @@ function pinpoint() {
                 listOfLines.pop();
             }
             redrawStoredLines();
+            writingAllLinesToDiv();
             keyAblocker = false;
             keyLblocker = false;
         }
@@ -307,6 +354,7 @@ function pinpoint() {
             deleteAllLines();
             keyAblocker = false;
             keyLblocker = false;
+            $( "#list" ).empty();
         }
 
         else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
