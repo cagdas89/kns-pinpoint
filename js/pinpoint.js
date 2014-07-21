@@ -2,6 +2,7 @@
 var canvas;
 var ctx;
 var listOfLines = [];
+var linesFromLocal=[];
 var checkKeyPressed = true;
 var background;
 var completionNumber = 30;
@@ -9,7 +10,6 @@ var line;
 var keyAblocker = false;
 var keySblocker = false;
 var keyLblocker = false;
-
 
 
 $(function () {
@@ -76,8 +76,8 @@ function drawAllLines() {
                 ctx.stroke();
             }
         }
-        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length-1].x,listOfLines[j].points[listOfLines[j].points.length-1].y);
-        ctx.lineTo(listOfLines[j].points[0].x,listOfLines[j].points[0].y);
+        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length - 1].x, listOfLines[j].points[listOfLines[j].points.length - 1].y);
+        ctx.lineTo(listOfLines[j].points[0].x, listOfLines[j].points[0].y);
         ctx.lineWidth = 2;
         ctx.stroke();
     }
@@ -87,9 +87,10 @@ function drawAllLines() {
 function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arrayde tutulan koordinatları da siliyor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
-    line.points = [];
+   // line.points = [];
     listOfLines = [];
     redrawStoredLines();
+    $("#list").empty();
 }
 
 
@@ -121,8 +122,8 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
                 ctx.stroke();
             }
         }
-        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length-1].x,listOfLines[j].points[listOfLines[j].points.length-1].y);
-        ctx.lineTo(listOfLines[j].points[0].x,listOfLines[j].points[0].y);
+        ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length - 1].x, listOfLines[j].points[listOfLines[j].points.length - 1].y);
+        ctx.lineTo(listOfLines[j].points[0].x, listOfLines[j].points[0].y);
         ctx.lineWidth = 2;
         ctx.stroke();
     }
@@ -132,14 +133,15 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
 
 function checkNames(vrb) { //Line lara aynı ismin verilmemesi için
     for (var i = 0; i < listOfLines.length; i++) {
-        if (vrb == listOfLines[i].name) {
-            alert("The name you entered is not available. Enter a diffrent name");
-            checkKeyPressed = true;
-            keyAblocker = false;
-            return false;
+        if (vrb) {
+            if (vrb == listOfLines[i].name || vrb.length == 0) {
+                alert("The name you entered is not available. Enter a diffrent name");
+                checkKeyPressed = true;
+                keyAblocker = false;
+                return false;
+            }
         }
     }
-    keyAblocker = false;
     return true;
 }
 
@@ -147,11 +149,9 @@ function checkNames(vrb) { //Line lara aynı ismin verilmemesi için
 function openWindow() { //listOfLines daki koordinatları yeni bir pencerede açıp JSON formatında yazdırıyor
 
     var myWindow = window.open("", "myWindow", "width=500, height=800");    // Opens a new window
-
     var outputData = {
         polygons: listOfLines
     };
-
     myWindow.document.write("<pre>" + JSON.stringify(outputData, null, 2) + "</pre>");
 }
 
@@ -161,11 +161,10 @@ function writingAllLinesToDiv() {
     var container = document.getElementById("list");
     var div;
 
-    $( "#list" ).empty();
-
-    for(var i=0;i<listOfLines.length;i++) {
+    for (var i = 0; i < listOfLines.length; i++) {
         div = document.createElement('div');
         div.innerHTML = listOfLines[i].name;
+        div.style.color = "white";
         container.appendChild(div);
     }
 }
@@ -192,18 +191,18 @@ window.onload = function () { //file api kullanarak localden text veya JSON dosy
                     var textFile = event.target;
 
                     var obj = textFile.result;
-                    listOfLines = JSON.parse(obj).polygons;
+                    linesFromLocal = JSON.parse(obj).polygons;
+                    listOfLines= listOfLines.concat(linesFromLocal);
                     drawAllLines();
+                    $("#list").empty();
                     writingAllLinesToDiv();
-
                 });
                 picReader.readAsText(file);
-
             }
         });
     }
     else {
-        console.log("Your browser does not support File API");
+        alert("Your browser does not support File API");
     }
 }
 
@@ -212,13 +211,11 @@ function writingNamestoDiv() {
 
     var container = document.getElementById("list");
     var div;
-
     div = document.createElement('div');
     div.innerHTML = listOfLines[listOfLines.length - 1].name;
-    div.style.color="white";
+    div.style.color = "white";
     container.appendChild(div);
 }
-
 
 
 function pinpoint() {
@@ -301,14 +298,14 @@ function pinpoint() {
 
         if (event.which == 65 && keyAblocker == false) {   //"A" tuşuna basıldığı zaman
 
-            event.preventDefault();
+            // event.preventDefault();
 
             checkKeyPressed = false;
             keyAblocker = true;
 
             var nameofLine = prompt("enter the new line name: ");
 
-           if (checkNames(nameofLine) == true) {
+            if (checkNames(nameofLine) == true) {
                 line = new Polygon();
                 line.name = nameofLine;
             }
@@ -333,28 +330,27 @@ function pinpoint() {
             checkKeyPressed = true;
             keyAblocker = false;
             keySblocker = true;
-            line=null;
-            
+            line = null;
+
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
-            if (line) {
-                line = null;
-            }
-            else {
-                listOfLines.pop();
-            }
+
+            line = null;
+            listOfLines.pop();
             redrawStoredLines();
+            $("#list").empty();
             writingAllLinesToDiv();
             keyAblocker = false;
             keyLblocker = false;
         }
 
         else if (event.which == 68) {   //"D" tuşuna basıldığı zaman
+            listOfLines = [];
+            $("#list").empty();
             deleteAllLines();
             keyAblocker = false;
             keyLblocker = false;
-            $( "#list" ).empty();
         }
 
         else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
@@ -362,5 +358,3 @@ function pinpoint() {
         }
     });
 }
-
-
