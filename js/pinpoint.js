@@ -2,7 +2,7 @@
 var canvas;
 var ctx;
 var listOfLines = [];
-var linesFromLocal=[];
+var linesFromLocal = [];
 var checkKeyPressed = true;
 var background;
 var completionNumber = 30;
@@ -54,6 +54,12 @@ var Polygon = function () {
 };
 
 
+function lineColor() {
+
+    return '#' + 323232;
+
+}
+
 function drawAllLines() {
 
     for (var j = 0; j < listOfLines.length; j++) {
@@ -79,6 +85,7 @@ function drawAllLines() {
         ctx.moveTo(listOfLines[j].points[listOfLines[j].points.length - 1].x, listOfLines[j].points[listOfLines[j].points.length - 1].y);
         ctx.lineTo(listOfLines[j].points[0].x, listOfLines[j].points[0].y);
         ctx.lineWidth = 2;
+        ctx.strokeStyle = lineColor();
         ctx.stroke();
     }
 }
@@ -87,7 +94,7 @@ function drawAllLines() {
 function deleteAllLines() {  //canvasda olan bütün çizgileri temizleyip arrayde tutulan koordinatları da siliyor
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(background, 0, 0);
-   // line.points = [];
+    // line.points = [];
     listOfLines = [];
     redrawStoredLines();
     $("#list").empty();
@@ -118,7 +125,7 @@ function redrawStoredLines() { //canvas'a yeni eklenen bir çizgiyi silmek için
                 ctx.lineTo(point.x, point.y);
 
                 ctx.lineWidth = 2;
-
+                ctx.strokeStyle = lineColor();
                 ctx.stroke();
             }
         }
@@ -172,7 +179,6 @@ function writingAllLinesToDiv() {
 
 window.onload = function () { //file api kullanarak localden text veya JSON dosyasını parse edip çizdiriyor
 
-
     if (window.File && window.FileList && window.FileReader) {
 
         var filesInput = document.getElementById("files");
@@ -192,7 +198,7 @@ window.onload = function () { //file api kullanarak localden text veya JSON dosy
 
                     var obj = textFile.result;
                     linesFromLocal = JSON.parse(obj).polygons;
-                    listOfLines= listOfLines.concat(linesFromLocal);
+                    listOfLines = listOfLines.concat(linesFromLocal);
                     drawAllLines();
                     $("#list").empty();
                     writingAllLinesToDiv();
@@ -218,6 +224,40 @@ function writingNamestoDiv() {
 }
 
 
+function writingLine() {
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(background, 0, 0);
+
+    ctx.beginPath();
+
+    for (var i = 0; i < line.points.length; i++) {
+
+        if (i == 0) {
+
+            var a = line.points[0];
+            ctx.moveTo(a.x, a.y);
+        }
+
+        else {
+            fnc(line.points[i]);
+        }
+        function fnc(point) {
+
+            ctx.lineTo(point.x, point.y);
+
+            ctx.lineWidth = 2;
+
+            ctx.stroke();
+        }
+    }
+    ctx.strokeStyle = lineColor();
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+}
+
+
 function pinpoint() {
 
     line = new Polygon();
@@ -239,44 +279,10 @@ function pinpoint() {
 
             //ilk tıklanan noktaya yakın bir yere tıklanınca otomatik tamamlama
             /*
-
-
              if (line.points.length > 0 && (((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber)) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber)) )) {
              x = line.points[0].x;
              y = line.points[0].y;
              }
-
-
-             else if ((line.points.length == 1) && ((x - line.points[0].x < completionNumber && x - line.points[0].x > 0) || (x - line.points[0].x < 0 && x - line.points[0].x > -completionNumber))) {
-             x = line.points[0].x;
-             console.log("ikinci e giren x ve y" + x + " " + y);
-
-             }
-
-             else if ((line.points.length == 1) && ((y - line.points[0].y < completionNumber && y - line.points[0].y > 0) || (y - line.points[0].y < 0 && y - line.points[0].y > -completionNumber))) {
-             y = line.points[0].y;
-             console.log("üçüncü if e giren x ve y" + x + " " + y);
-
-             }
-
-             else if((line.points.length>1) && ((x - line.points[line.points.length-1].x < completionNumber && x - line.points[line.points.length-1].x > 0) || (x - line.points[line.points.length-1].x < 0 && x - line.points[line.points.length-1].x > -completionNumber))){
-             x = line.points[line.points.length-2].x;
-             console.log("dördüncü if e giren x ve y"+x+" "+y);
-             for(var i=0;i<line.points.length;i++){
-             console.log("dördüncü coo: "+line.points[i].x+" "+line.points[i].y);
-
-             }
-             }
-
-             else if((line.points.length>1) && ((y - line.points[line.points.length-1].y < completionNumber && y - line.points[line.points.length-1].y > 0) || (y - line.points[line.points.length-1].y < 0 && y - line.points[line.points.length-1].y > -completionNumber))){
-             y = line.points[line.points.length-2].y;
-             console.log("sonuncu if e giren x ve y"+x+" "+y);
-             for(var i=0;i<line.points.length;i++){
-             console.log("sonuncu coo: "+line.points[i].x+" "+line.points[i].y);
-
-             }
-             }
-
              */
 
             line.addLine(x, y);//line'ın koordinatlarını vererek canvas'a çizdirme
@@ -287,7 +293,7 @@ function pinpoint() {
                 ctx.moveTo(line.points[line.points.length - 2].x, line.points[line.points.length - 2].y);
                 ctx.lineTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y);
                 ctx.lineWidth = 2;
-                ctx.strokeStyle = '#ff0000';
+                ctx.strokeStyle = lineColor();
                 ctx.stroke();
             }
         }
@@ -297,8 +303,6 @@ function pinpoint() {
     $("body").keydown(function (event) {
 
         if (event.which == 65 && keyAblocker == false) {   //"A" tuşuna basıldığı zaman
-
-            // event.preventDefault();
 
             checkKeyPressed = false;
             keyAblocker = true;
@@ -320,7 +324,7 @@ function pinpoint() {
             ctx.moveTo(line.points[line.points.length - 1].x, line.points[line.points.length - 1].y);
             ctx.lineTo(line.points[0].x, line.points[0].y);
             ctx.lineWidth = 2;
-            ctx.strokeStyle = '#ff0000';
+            ctx.strokeStyle = lineColor();
             ctx.stroke();
 
             alert("Line has been saved");
@@ -335,9 +339,9 @@ function pinpoint() {
         }
 
         else if (event.which == 90) {   //"Z" tuşuna basıldığı zaman son eklenen line'ı siliyo
-
-            line = null;
+            // line = null;
             listOfLines.pop();
+
             redrawStoredLines();
             $("#list").empty();
             writingAllLinesToDiv();
@@ -356,5 +360,13 @@ function pinpoint() {
         else if (event.which == 87) {   //"W" tuşuna basıldığı zaman
             openWindow();
         }
+
+        else if (event.which == 76) {   //"L" tuşuna basıldığı zaman
+            line.points.pop();
+            writingLine();
+            drawAllLines();
+        }
+
+
     });
 }
